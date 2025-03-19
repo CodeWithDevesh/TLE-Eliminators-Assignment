@@ -19,7 +19,6 @@ const signup = async (req: Request, res: Response): Promise<any> => {
     }
 
     const saltRounds = parseInt(process.env.BCRYPT_SALT!);
-    console.log(password)
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     const newUser = new userModel({

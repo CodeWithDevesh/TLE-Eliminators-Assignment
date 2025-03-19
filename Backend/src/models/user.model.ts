@@ -4,7 +4,7 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
-  bookmarks: [mongoose.Schema.Types.ObjectId];
+  bookmarks: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
   role: string;

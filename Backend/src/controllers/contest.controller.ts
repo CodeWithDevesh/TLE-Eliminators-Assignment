@@ -12,7 +12,6 @@ export const fetchContests = async (): Promise<void> => {
 
     const contests: IContest[] = [];
 
-    // Parse Codeforces contests
     codeforces.data.result.forEach((c: any) => {
       if (c.phase === "BEFORE") {
         contests.push({
@@ -25,7 +24,6 @@ export const fetchContests = async (): Promise<void> => {
       }
     });
 
-    // Parse Leetcode contests
     leetcode.data.forEach((c: any) => {
       contests.push({
         name: c.name,
@@ -36,7 +34,6 @@ export const fetchContests = async (): Promise<void> => {
       } as IContest);
     });
 
-    // Parse CodeChef contests
     codechef.data.forEach((c: any) => {
       contests.push({
         name: c.name,
@@ -47,7 +44,6 @@ export const fetchContests = async (): Promise<void> => {
       } as IContest);
     });
 
-    // Store contests in MongoDB
     await Contest.deleteMany({ status: "upcoming" });
     await Contest.insertMany(contests);
     console.log("Contests updated successfully.");
@@ -76,8 +72,17 @@ export const getContests = async (req: Request, res: Response) => {
     const limitNumber = parseInt(limit as string, 10);
 
     let query: any = {};
-    if (platform) query.platform = platform;
+
+    if (platform) {
+      if (Array.isArray(platform)) {
+        query.platform = { $in: platform };
+      } else if (typeof platform === "string") {
+        query.platform = { $in: platform.split(",") };
+      }
+    }
+
     if (search) query.name = { $regex: search, $options: "i" };
+
     if (startDate || endDate) {
       query.start_time = {};
       if (startDate) query.start_time.$gte = new Date(startDate as string);
@@ -106,3 +111,18 @@ export const getContests = async (req: Request, res: Response) => {
     res.status(500).json({ ok: false, message: "Internal server error" });
   }
 };
+
+
+
+export const getContestWithId = async (req: Request, res: Response) => {
+  try {
+    const contest = await Contest.findById(req.params.id);
+    if (!contest) {
+      return res.status(404).json({ ok: false, message: "Contest not found" });
+    }
+    res.json({ ok: true, data: contest });
+  } catch (error) {
+    console.error("Error fetching contest:", error);
+    res.status(500).json({ ok: false, message: "Internal server error" });
+  }
+}

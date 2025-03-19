@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import userModel from "../models/user.model";
 import { Request, Response } from "express";
 
@@ -15,7 +16,7 @@ const getProfile = async (
   res: Response
 ): Promise<any> => {
   try {
-    const user = await userModel.findById(req.userId).select("-password");
+    const user = await userModel.findById(req.userId).populate('bookmarks').select("-password");
     if (!user) {
       return res.status(404).json({
         message: "User Not Found",
@@ -80,4 +81,75 @@ const updateProfile = async (
   }
 };
 
-export { getProfile, updateProfile };
+const bookmark = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<any> => {
+  const { contestId } = req.body;
+  try {
+    const user = await userModel.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({
+        message: "User Not Found",
+        ok: false,
+      });
+    }
+
+    if (user.bookmarks && user.bookmarks.includes(contestId)) {
+      user.bookmarks = user.bookmarks.filter(
+        (bookmark) => bookmark != contestId
+      );
+      await user.save();
+      return res.status(200).json({
+        message: "Bookmark removed successfully!",
+        ok: true,
+      });
+    }
+
+    const mongoose = require("mongoose");
+    const contestObjectId: mongoose.Types.ObjectId =
+      new mongoose.Types.ObjectId(contestId);
+    user.bookmarks = user.bookmarks
+      ? [...user.bookmarks, contestObjectId]
+      : [contestObjectId];
+    await user.save();
+
+    return res.status(200).json({
+      message: "Bookmarked successfully!",
+      ok: true,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Some error occurred.",
+      error: err,
+      ok: false,
+    });
+  }
+};
+
+const getBookmarkedProjects = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const user = await userModel.findById(req.userId).populate("bookmarks");
+    if (!user) {
+      return res.status(404).json({
+        message: "User Not Found",
+        ok: false,
+      });
+    }
+    return res.status(200).json({
+      response: user.bookmarks,
+      ok: true,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Some error occurred.",
+      error: err,
+      ok: false,
+    });
+  }
+};
+
+export { getProfile, updateProfile, bookmark, getBookmarkedProjects };
