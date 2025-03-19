@@ -63,16 +63,6 @@ function Navbar() {
                   className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                   onClick={() => {
                     setShowMenu(false);
-                    navigate("/bookmarks");
-                  }}
-                >
-                  <Bookmark size={20} color="#99a1af" />
-                  Bookmarks
-                </button>
-                <button
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                  onClick={() => {
-                    setShowMenu(false);
                     navigate("/profile");
                   }}
                 >
