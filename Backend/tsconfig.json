@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ES2017", // or higher (e.g., ES2018, ES2020)
+    "module": "CommonJS",
+    "lib": ["ES2017", "DOM"], // Include DOM for Puppeteer
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
+  }
+}
